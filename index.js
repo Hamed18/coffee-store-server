@@ -31,21 +31,6 @@ async function run() {
 
 	const coffeeCollection = client.db("coffeeDB").collection("coffee"); // connects your Node.js application to the coffeeDB database and specifically to the coffee collection within that database.
   
-  // READ 
-  app.get('/coffee', async(req,res) => {  // Setting Up the GET Route: When someone makes a GET request to /coffee, this function will be executed. app.get is a method used to define a route that handles GET requests., async (req, res) => { ... } is an asynchronous function 
-    const cursor = coffeeCollection.find();  // coffeeCollection.find() is used to query all the documents in the coffee collection. It returns a cursor, which is like a pointer that allows you to iterate through the results of the query.
-    const result = await cursor.toArray();  // await cursor.toArray() converts all the documents that the cursor points to into an array. await ensures that the code waits for this operation to complete before moving on.
-    res.send(result);  // res.send(result) sends the array of documents (result) back to the client (e.g., a web browser or another server) as the response to the GET request.
-  })   // now go to http://localhost:5000/coffee you will find all data in an array
-
-  // UPDATE
-  app.get('/coffee/:id', async(req,res) => {
-     const id = req.params.id;
-     const query = {_id : new ObjectId(id)}
-     const result = await coffeeCollection.findOne(query);
-     res.send(result);
-  })
-
   // CREATE 
 	app.post('/coffee', async(req,res) => {
 		const newCoffee = req.body;
@@ -54,12 +39,36 @@ async function run() {
 		res.send(result);
 	})
 
-  // UPDATE 
-  app.put('/coffee/:id', async(req,res) => {
-    const id = req.params.id;
-    const filter = {_id: new ObjectId(id)}
-    const options = {upsert: true};
-    const updatedCoffee = req.body;
+  // READ 
+  app.get('/coffee', async(req,res) => {  // Setting Up the GET Route: When someone makes a GET request to /coffee, this function will be executed. app.get is a method used to define a route that handles GET requests., async (req, res) => { ... } is an asynchronous function 
+    const cursor = coffeeCollection.find();  // coffeeCollection.find() is used to query all the documents in the coffee collection. It returns a cursor, which is like a pointer that allows you to iterate through the results of the query.
+    const result = await cursor.toArray();  // await cursor.toArray() converts all the documents that the cursor points to into an array. await ensures that the code waits for this operation to complete before moving on.
+    res.send(result);  // res.send(result) sends the array of documents (result) back to the client (e.g., a web browser or another server) as the response to the GET request.
+  })   // now go to http://localhost:5000/coffee you will find all data in an array
+
+  // DELETE
+  app.delete('/coffee/:id', async(req,res) => {  // Defining the DELETE Route:
+      const id = req.params.id;  // Extracting the id from the Request:
+      const query = {_id : new ObjectId(id)} //creates a query object that specifies which document to delete. new ObjectId(id) converts the id string into an ObjectId, which is the format MongoDB uses for _id fields.
+      const result = await coffeeCollection.deleteOne(query);
+      res.send(result);
+  })
+  
+  
+  // UPDATE: When a card is clicked for update, a new page is loaded in UI, that specific card's data needs to be retrieved from mongo database
+  app.get('/coffee/:id', async(req,res) => {
+     const id = req.params.id;
+     const query = {_id : new ObjectId(id)}
+     const result = await coffeeCollection.findOne(query);
+     res.send(result);
+  })
+
+  // UPDATE : After Edit/Updating/changing a card, mongo database needs to be updated
+  app.put('/coffee/:id', async(req,res) => {  // Defining the PUT Route:
+    const id = req.params.id;  // Extracting the id from the Request:
+    const filter = {_id: new ObjectId(id)}  // The filter object is created to specify which document to update. It uses the _id field to identify the document.
+    const options = {upsert: true};  // The options object includes an upsert option set to true. upsert: true means that if no document with the specified _id exists, MongoDB will create a new document with that _id.
+    const updatedCoffee = req.body;  // req.body contains the new data sent from the client to update the document
     const coffee = {
       $set: {
         name : updatedCoffee.name,
@@ -72,15 +81,7 @@ async function run() {
       }
     }
     const result = await coffeeCollection.updateOne(filter,coffee,options);
-    res.send(result);
-  })
-
-  // DELETE
-  app.delete('/coffee/:id', async(req,res) => {  // Defining the DELETE Route:
-    const id = req.params.id;  // Extracting the id from the Request:
-    const query = {_id : new ObjectId(id)} //creates a query object that specifies which document to delete. new ObjectId(id) converts the id string into an ObjectId, which is the format MongoDB uses for _id fields.
-    const result = await coffeeCollection.deleteOne(query);
-    res.send(result);
+    res.send(result); //filter specifies which document to update. coffee object specifies the new data to be applied. options include the upsert setting
   })
 
     // Send a ping to confirm a successful connection
