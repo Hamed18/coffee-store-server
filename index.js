@@ -30,7 +30,9 @@ async function run() {
   await client.connect();
 
 	const coffeeCollection = client.db("coffeeDB").collection("coffee"); // connects your Node.js application to the coffeeDB database and specifically to the coffee collection within that database.
-  
+  // new user collection
+  const userCollection = client.db('coffeeDB').collection('user')
+
   // CREATE 
 	app.post('/coffee', async(req,res) => {
 		const newCoffee = req.body;
@@ -83,6 +85,14 @@ async function run() {
     const result = await coffeeCollection.updateOne(filter,coffee,options);
     res.send(result); //filter specifies which document to update. coffee object specifies the new data to be applied. options include the upsert setting
   })
+
+  // user related api
+  app.post('/user', async(req,res) => {
+		const newUser = req.body;
+		console.log(newUser);
+		const result = await userCollection.insertOne(newUser);
+		res.send(result);
+	})
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
