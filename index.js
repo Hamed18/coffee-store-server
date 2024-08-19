@@ -86,13 +86,30 @@ async function run() {
     res.send(result); //filter specifies which document to update. coffee object specifies the new data to be applied. options include the upsert setting
   })
 
-  // user related api
+  /* ------------------ user related api --------------------- */
+  // Create User
   app.post('/user', async(req,res) => {
 		const newUser = req.body;
 		console.log(newUser);
 		const result = await userCollection.insertOne(newUser);
 		res.send(result);
 	})
+
+  // READ user data
+  app.get('/user', async(req,res) => {
+     const cursor = userCollection.find();
+     const users = await cursor.toArray();
+     res.send(users);
+  })
+
+  // DELETE user data
+  app.delete('/user/:id', async(req,res) => {
+    const id = req.params.id;
+    const query = {_id: new ObjectId(id)};
+    const result = await userCollection.deleteOne(query);
+    res.send(result);
+  })
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
